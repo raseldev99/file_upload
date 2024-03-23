@@ -79,26 +79,25 @@ const uploaded = ref(0)
 
 defineProps({ errors: Object })
 
-function onDrop(acceptFiles, rejectReasons) {
-  console.log(acceptFiles);
-  console.log(rejectReasons);
+async function onDrop(acceptFiles, rejectReasons) {
   if (acceptFiles.length > 0){
     file.value = acceptFiles[0]
-   router.post('/store',{
+    router.post('/store',{
       file:file.value,
       unique_id:unique_id.value
     },{
       forceFormData: true,
       onProgress:(event)=>{
         uploaded.value = event.percentage
-        console.log(event)
+      },
+      onSuccess: ()=>{
+          toast.success('File has been successfully uploaded!')
       }
     })
   }
 }
 onMounted(()=>{
   unique_id.value = uuid.v4()
-  console.log(unique_id.value)
 })
 const { getRootProps, getInputProps,isDragActive} = useDropzone({ onDrop });
 
