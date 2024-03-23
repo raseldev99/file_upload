@@ -24,7 +24,7 @@
       </div>
 
       <!--File upload info--->
-      <div v-else class="flex flex-col justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600">
+      <div v-else class="flex flex-col justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg" :class="[errors?.file || errors.unique_id ? 'bg-red-300' : ' bg-gray-50 dark:border-gray-600 dark:hover:border-gray-500 dark:bg-gray-700']">
         <div class="px-2">
           <!--Progress bar--->
           <FwbProgress class="w-full" :progress="uploaded" label-position="inside" label-progress size="lg" />
@@ -57,6 +57,10 @@
         </div>
       </div>
     </div>
+      <div class="mt-5">
+        <p class="text-red-500 text-sm py-2" v-if="errors?.file">{{errors.file}}</p>
+        <p class="text-red-500 text-sm py-2" v-if="errors?.unique_id">{{errors.unique_id}}</p>
+      </div>
   </div>
 </template>
 
@@ -65,24 +69,29 @@ import { useDropzone } from "vue3-dropzone";
 import { FwbProgress } from 'flowbite-vue'
 import {onMounted, ref} from "vue";
 import { uuid } from 'vue3-uuid';
-import {router, useForm} from "@inertiajs/vue3";
+import {router} from "@inertiajs/vue3";
+import { toast } from 'vue3-toastify';
+import 'vue3-toastify/dist/index.css';
 
 const unique_id = ref(null)
 const file = ref(null)
 const uploaded = ref(0)
+
+defineProps({ errors: Object })
 
 function onDrop(acceptFiles, rejectReasons) {
   console.log(acceptFiles);
   console.log(rejectReasons);
   if (acceptFiles.length > 0){
     file.value = acceptFiles[0]
-    router.post('/store',{
+   router.post('/store',{
       file:file.value,
       unique_id:unique_id.value
     },{
       forceFormData: true,
-      onProgress:({percentage})=>{
-        uploaded.value = percentage
+      onProgress:(event)=>{
+        uploaded.value = event.percentage
+        console.log(event)
       }
     })
   }
